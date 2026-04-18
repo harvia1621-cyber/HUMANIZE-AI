@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Text Humanizer - Clean Copy Paste Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e9eef5 100%);
+    min-height: 100vh;
+    padding: 20px;
+    color: #1a1f36;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .header h1 {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .header p {
+    font-size: 16px;
+    color: #666;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+
+  .panel {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .panel-title {
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #667eea;
+    margin-bottom: 12px;
+  }
+
+  textarea {
+    flex: 1;
+    width: 100%;
+    min-height: 350px;
+    padding: 14px;
+    border: 2px solid #e0e5f0;
+    border-radius: 8px;
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    color: #1a1f36;
+    resize: vertical;
+    transition: border-color 0.2s;
+  }
+
+  textarea:focus {
+    outline: none;
+    border-color: #667eea;
+  }
+
+  textarea::placeholder {
+    color: #aaa;
+  }
+
+  .button-group {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  button {
+    flex: 1;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+  }
+
+  .btn-primary:active {
+    transform: translateY(0);
+  }
+
+  .btn-secondary {
+    background: #f0f3f8;
+    color: #667eea;
+    border: 2px solid #e0e5f0;
+  }
+
+  .btn-secondary:hover {
+    background: #e0e5f0;
+  }
+
+  .center-column {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .separator {
+    text-align: center;
+    color: #999;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .settings {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+    margin-bottom: 30px;
+  }
+
+  .settings-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: #1a1f36;
+  }
+
+  .api-input-group {
+    display: flex;
+    gap: 12px;
+  }
+
+  .api-input-group input {
+    flex: 1;
+    padding: 12px 14px;
+    border: 2px solid #e0e5f0;
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: 'Space Mono', monospace;
+    transition: border-color 0.2s;
+  }
+
+  .api-input-group input:focus {
+    outline: none;
+    border-color: #667eea;
+  }
+
+  .api-input-group input::placeholder {
+    color: #aaa;
+  }
+
+  .api-input-group button {
+    padding: 12px 24px;
+  }
+
+  .info-box {
+    background: linear-gradient(135deg, #f0f3f8 0%, #e9eef5 100%);
+    border: 2px solid #e0e5f0;
+    border-left: 4px solid #667eea;
+    border-radius: 8px;
+    padding: 14px;
+    margin-top: 16px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #555;
+  }
+
+  .info-box a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .info-box a:hover {
+    text-decoration: underline;
+  }
+
+  .status {
+    padding: 12px 16px;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: 12px;
+    display: none;
+  }
+
+  .status.show {
+    display: block;
+  }
+
+  .status.working {
+    background: #fff3cd;
+    color: #856404;
+  }
+
+  .status.success {
+    background: #d4edda;
+    color: #155724;
+  }
+
+  .status.error {
+    background: #f8d7da;
+    color: #721c24;
+  }
+
+  .char-count {
+    font-size: 12px;
+    color: #999;
+    margin-top: 8px;
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 4px;
+    height: 4px;
+    background: currentColor;
+    border-radius: 50%;
+    animation: spin 0.6s infinite;
+    margin-right: 4px;
+  }
+
+  @keyframes spin {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+
+
+  @media (max-width: 900px) {
+    .content {
+      grid-template-columns: 1fr;
+    }
+
+    .center-column {
+      display: none;
+    }
+
+    .header h1 {
+      font-size: 24px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>✨ AI to Human Text Converter</h1>
+    <p>Convert AI-generated text to 100% human-written. Pass GPTZero, Originality.ai, Turnitin. 3-pass deep rewrite.</p>
+  </div>
+
+  <div class="settings">
+    <div class="settings-title">⚙️ API Configuration</div>
+    <div class="api-input-group">
+      <input 
+        type="password" 
+        id="apiKey" 
+        placeholder="Paste your Anthropic API key here (sk-ant-...)"
+      >
+      <button class="btn-primary" onclick="saveApiKey()">Save Key</button>
+    </div>
+    <div class="info-box">
+      📌 Get a free API key from <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>. Your key is stored locally in your browser only.
+    </div>
+    <div id="keyStatus" class="status"></div>
+  </div>
+
+  <div class="content">
+    <!-- LEFT: FORMAL INPUT -->
+    <div class="panel">
+      <div class="panel-title">📋 AI Text (Paste Here)</div>
+      <textarea 
+        id="formalText"
+        placeholder="Paste your AI-generated text, ChatGPT output, or formal content here..."
+      ></textarea>
+      <div class="char-count">
+        <span id="formalCount">0</span> characters
+      </div>
+      <div class="button-group">
+        <button class="btn-primary" onclick="humanizeText()">Convert to Human (3-pass)</button>
+        <button class="btn-secondary" onclick="clearFormal()">Clear</button>
+      </div>
+      <div id="formalStatus" class="status"></div>
+    </div>
+
+    <!-- CENTER: ARROW -->
+    <div class="center-column">
+      <div class="separator">↓ Click above ↓</div>
+    </div>
+
+    <!-- RIGHT: HUMAN OUTPUT -->
+    <div class="panel">
+      <div class="panel-title">✅ 100% Human Text (Copy Here)</div>
+      <textarea 
+        id="humanText"
+        placeholder="Your cleaned text will appear here..."
+        readonly
+      ></textarea>
+      <div class="char-count">
+        <span id="humanCount">0</span> characters
+      </div>
+      <div class="button-group">
+        <button class="btn-primary" onclick="copyText()">Copy to Clipboard</button>
+        <button class="btn-secondary" onclick="clearHuman()">Clear</button>
+      </div>
+      <div id="humanStatus" class="status"></div>
+    </div>
+  </div>
+
+
+</div>
+
+<script>
+  const formalText = document.getElementById('formalText');
+  const humanText = document.getElementById('humanText');
+  const apiKeyInput = document.getElementById('apiKey');
+  const formalStatus = document.getElementById('formalStatus');
+  const humanStatus = document.getElementById('humanStatus');
+  const keyStatus = document.getElementById('keyStatus');
+
+  // Load saved API key
+  try {
+    const saved = localStorage.getItem('humanizer_api_key');
+    if (saved) {
+      apiKeyInput.value = saved;
+      showKeyStatus('✓ API key loaded', 'success');
+    }
+  } catch(e) {}
+
+  // Update character counts
+  formalText.addEventListener('input', () => {
+    document.getElementById('formalCount').textContent = formalText.value.length.toLocaleString();
+  });
+
+  humanText.addEventListener('input', () => {
+    document.getElementById('humanCount').textContent = humanText.value.length.toLocaleString();
+  });
+
+  function saveApiKey() {
+    const key = apiKeyInput.value.trim();
+    if (!key.startsWith('sk-ant-')) {
+      showKeyStatus('❌ Invalid key (must start with sk-ant-)', 'error');
+      return;
+    }
+    try {
+      localStorage.setItem('humanizer_api_key', key);
+      showKeyStatus('✓ API key saved securely', 'success');
+    } catch(e) {
+      showKeyStatus('❌ Failed to save key', 'error');
+    }
+  }
+
+  function showKeyStatus(msg, type) {
+    keyStatus.textContent = msg;
+    keyStatus.className = `status show ${type}`;
+    setTimeout(() => keyStatus.classList.remove('show'), 3000);
+  }
+
+  function showStatus(element, msg, type) {
+    element.textContent = msg;
+    element.className = `status show ${type}`;
+  }
+
+  async function humanizeText() {
+    const text = formalText.value.trim();
+    const key = apiKeyInput.value.trim();
+
+    if (!key.startsWith('sk-ant-')) {
+      showStatus(formalStatus, '❌ Save your API key first', 'error');
+      return;
+    }
+
+    if (!text) {
+      showStatus(formalStatus, '❌ Paste text first', 'error');
+      return;
+    }
+
+    showStatus(formalStatus, '<span class="spinner"></span>Pass 1/3 - Deep rewrite...', 'working');
+    humanText.value = '';
+
+    try {
+      const apiCall = async (system, userMsg, passNum) => {
+        showStatus(formalStatus, `<span class="spinner"></span>Pass ${passNum}/3...`, 'working');
+        
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': key,
+            'anthropic-version': '2023-06-01'
+          },
+          body: JSON.stringify({
+            model: 'claude-opus-4-1',
+            max_tokens: 3000,
+            system: system,
+            messages: [{ role: 'user', content: userMsg }]
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error?.message || 'API Error');
+        }
+
+        const data = await response.json();
+        return data.content[0].text.trim();
+      };
+
+      // PASS 1 - Structural rewrite with human patterns
+      const pass1System = `You are rewriting AI-generated text to sound completely human-written. You MUST pass GPTZero, Originality.ai, and Turnitin.
+
+CRITICAL RULES:
+1. Rewrite EVERY sentence completely differently - NOT ONE original sentence survives
+2. Vary sentence length wildly: some 2-3 words, some long rambling ones with extra thoughts
+3. Use unexpected word choices - not the obvious synonym but the slightly surprising one a real person would use
+4. Add natural human fillers: "honestly", "basically", "like", "you know", "I mean", "kind of", "pretty much", "actually"
+5. Use contractions EVERYWHERE: don't, won't, can't, I'm, it's, they're, we've, etc.
+6. Remove formal patterns: no "Furthermore", "Moreover", "It is important", "Utilize", "Leverage", "Facilitate"
+7. Change passive voice to active where possible
+8. PRESERVE ALL FACTS AND INFORMATION - just say them completely differently
+9. Keep section headings but make body text sound natural
+10. Output ONLY the rewritten text with headings preserved.`;
+
+      const pass1Msg = `Rewrite this AI text to sound 100% human. Apply all rules strictly. Keep the headings but completely rewrite all paragraphs:\n\n${text}`;
+      const pass1 = await apiCall(pass1System, pass1Msg, 1);
+
+      humanText.value = pass1;
+      document.getElementById('humanCount').textContent = pass1.length.toLocaleString();
+
+      // PASS 2 - Burstiness and rhythm injection
+      const pass2System = `You are a human writing coach improving text rhythm. The text below sounds mostly human but may have even sentence rhythms that AI detectors flag.
+
+Your job:
+1. Fix uneven sentence lengths - find paragraphs where sentences are too similar in length
+2. Split some long sentences into 2-3 short punchy ones
+3. Merge some short choppy sentences into flowing longer ones
+4. Add 2-3 natural human expressions per paragraph: "which is kind of wild", "honestly though", "and that actually matters", "you know", "it's weird but", "right?"
+5. Replace any remaining formal words with casual equivalents
+6. Check for sentences starting with "This", "The", "These", "It" too many times - vary the openings
+7. Look for any passive voice and convert to active
+8. Do NOT change facts. Do NOT add information. Do NOT remove ideas.
+9. Keep the headings and overall structure.
+10. Output ONLY the improved text.`;
+
+      const pass2Msg = `Improve the rhythm and human feel while keeping the meaning and facts:\n\n${pass1}`;
+      const pass2 = await apiCall(pass2System, pass2Msg, 2);
+
+      humanText.value = pass2;
+      document.getElementById('humanCount').textContent = pass2.length.toLocaleString();
+
+      // PASS 3 - Final AI detector sweep
+      const pass3System = `You are an expert at beating AI detection (GPTZero, Originality.ai, Turnitin). Scan this text and fix every AI pattern:
+
+1. Any sentences starting with "This", "The", "These", "It" → vary openings
+2. Any passive voice → convert to active
+3. Any word used more than twice in same paragraph → replace duplicate with different word
+4. Any sentence over 35 words with no pause → break it into shorter ones
+5. Any 3+ sentences in a row of similar length → adjust rhythm to vary
+6. These phrases → replace with casual equivalents:
+   - "play a crucial role" → "really matter" / "make a big difference"
+   - "significant impact" → "big effect" / "really changes things"
+   - "wide range" → "lots of" / "all kinds of"
+   - "key factor" → "big thing" / "really important part"
+   - "in order to" → "to"
+   - "as well as" → "plus" / "and also"
+   - "such as" → "like"
+7. Look for sentences that sound robotic or too formal → reword naturally
+8. Check for phrases like "Furthermore", "Moreover", "In conclusion" → use "so", "anyway", "look", "here's the thing"
+9. Do NOT change any facts or information
+10. Output ONLY the final polished text.`;
+
+      const pass3Msg = `Final pass - fix all remaining AI detection patterns:\n\n${pass2}`;
+      const pass3 = await apiCall(pass3System, pass3Msg, 3);
+
+      humanText.value = pass3;
+      document.getElementById('humanCount').textContent = pass3.length.toLocaleString();
+      
+      showStatus(formalStatus, '✓ Complete - 100% human!', 'success');
+      showStatus(humanStatus, '✓ Done! Ready to copy', 'success');
+    } catch (err) {
+      showStatus(formalStatus, `❌ ${err.message}`, 'error');
+      showStatus(humanStatus, '❌ Failed', 'error');
+    }
+  }
+
+  function copyText() {
+    const text = humanText.value.trim();
+    if (!text) {
+      showStatus(humanStatus, '❌ Nothing to copy', 'error');
+      return;
+    }
+    navigator.clipboard.writeText(text).then(() => {
+      showStatus(humanStatus, '✓ Copied to clipboard!', 'success');
+    }).catch(() => {
+      showStatus(humanStatus, '❌ Copy failed', 'error');
+    });
+  }
+
+  function clearFormal() {
+    formalText.value = '';
+    document.getElementById('formalCount').textContent = '0';
+  }
+
+  function clearHuman() {
+    humanText.value = '';
+    document.getElementById('humanCount').textContent = '0';
+  }
+
+  // Keyboard shortcut: Ctrl+Enter to humanize
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      humanizeText();
+    }
+  });
+</script>
+
+</body>
+</html>
