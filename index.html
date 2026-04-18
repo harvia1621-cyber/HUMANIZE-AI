@@ -6,232 +6,68 @@
 <title>AI to Human Text Converter</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0a0a0f;
-    --surface: #13131a;
-    --surface2: #1c1c28;
-    --border: #2a2a3d;
-    --accent: #7c6af7;
-    --accent2: #e055a3;
-    --text: #e8e8f0;
-    --muted: #6b6b88;
-    --success: #2dd4a0;
-    --error: #f05a5a;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Syne', sans-serif;
-    background: var(--bg);
-    min-height: 100vh;
-    color: var(--text);
-    overflow-x: hidden;
-  }
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background:
-      radial-gradient(ellipse 60% 50% at 10% 20%, rgba(124,106,247,0.12) 0%, transparent 60%),
-      radial-gradient(ellipse 50% 40% at 90% 80%, rgba(224,85,163,0.09) 0%, transparent 60%);
-    pointer-events: none;
-    z-index: 0;
-  }
-  .wrapper {
-    position: relative;
-    z-index: 1;
-    max-width: 1180px;
-    margin: 0 auto;
-    padding: 40px 24px 60px;
-  }
-  header {
-    text-align: center;
-    margin-bottom: 36px;
-    animation: fadeUp 0.6s ease both;
-  }
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 100px;
-    padding: 5px 14px;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--accent);
-    letter-spacing: 1.2px;
-    text-transform: uppercase;
-    margin-bottom: 18px;
-  }
-  h1 {
-    font-size: clamp(28px, 5vw, 50px);
-    font-weight: 800;
-    line-height: 1.1;
-    letter-spacing: -1px;
-    background: linear-gradient(135deg, #fff 0%, #c4beff 50%, #e055a3 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 12px;
-  }
-  header p { font-size: 15px; color: var(--muted); max-width: 500px; margin: 0 auto; line-height: 1.7; }
-
-  .config-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 24px 28px;
-    margin-bottom: 24px;
-    animation: fadeUp 0.6s 0.1s ease both;
-  }
-  .card-label {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 1.4px;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 14px;
-  }
-  .api-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-  }
-  @media (max-width: 580px) { .api-grid { grid-template-columns: 1fr; } }
-  .field-label { font-size: 12px; color: var(--muted); font-weight: 600; margin-bottom: 6px; }
-  select, .api-input {
-    width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 11px 14px;
-    font-family: 'DM Mono', monospace;
-    font-size: 13px;
-    color: var(--text);
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    appearance: none;
-  }
-  select {
-    cursor: pointer;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236b6b88' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 14px center;
-    padding-right: 36px;
-  }
-  select option { background: #1c1c28; }
-  select:focus, .api-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(124,106,247,0.18); }
-  .api-input::placeholder { color: var(--muted); }
-  .hint-box {
-    margin-top: 14px;
-    padding: 11px 14px;
-    background: var(--surface2);
-    border-radius: 10px;
-    font-size: 12.5px;
-    color: var(--muted);
-    line-height: 1.75;
-  }
-  .hint-box a { color: var(--accent); text-decoration: none; font-weight: 600; }
-  .hint-box a:hover { text-decoration: underline; }
-  .hint-box code { background: rgba(124,106,247,0.15); color: var(--accent); padding: 1px 6px; border-radius: 4px; font-family: 'DM Mono', monospace; font-size: 12px; }
-
-  .editor-grid {
-    display: grid;
-    grid-template-columns: 1fr 48px 1fr;
-    gap: 16px;
-    align-items: start;
-    animation: fadeUp 0.6s 0.2s ease both;
-  }
-  @media (max-width: 700px) {
-    .editor-grid { grid-template-columns: 1fr; }
-    .arrow-col { display: none; }
-  }
-  .panel {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .panel-head { display: flex; align-items: center; justify-content: space-between; }
-  .panel-title { font-size: 13px; font-weight: 700; }
-  .char-pill {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 100px;
-    padding: 3px 10px;
-    font-size: 11px;
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-  }
-  textarea {
-    width: 100%;
-    min-height: 220px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px;
-    font-family: 'Syne', sans-serif;
-    font-size: 14px;
-    color: var(--text);
-    line-height: 1.7;
-    resize: vertical;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  textarea:focus { border-color: var(--accent); }
-  textarea::placeholder { color: var(--muted); }
-  textarea[readonly] { cursor: default; }
-  .panel-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 11px 20px;
-    border: none;
-    border-radius: 12px;
-    font-family: 'Syne', sans-serif;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-    white-space: nowrap;
-  }
-  .btn-primary {
-    background: linear-gradient(135deg, var(--accent) 0%, #9b88ff 100%);
-    color: #fff;
-    box-shadow: 0 4px 18px rgba(124,106,247,0.3);
-  }
-  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(124,106,247,0.45); }
-  .btn-primary:active { transform: translateY(0); }
-  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
-  .btn-ghost { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
-  .btn-ghost:hover { color: var(--text); border-color: var(--accent); }
-  .btn-copy { background: rgba(45,212,160,0.12); color: var(--success); border: 1px solid rgba(45,212,160,0.25); flex: 1; }
-  .btn-copy:hover { background: rgba(45,212,160,0.22); }
-  .arrow-col { display: flex; align-items: center; justify-content: center; padding-top: 120px; }
-  .arrow-icon { font-size: 22px; color: var(--muted); }
-  .progress-wrap { display: none; flex-direction: column; gap: 6px; }
-  .progress-wrap.show { display: flex; }
-  .progress-label { font-size: 12px; color: var(--muted); }
-  .progress-bar-bg { background: var(--surface2); border-radius: 100px; height: 4px; overflow: hidden; }
-  .progress-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 100px; transition: width 0.4s ease; }
-  .status-line { font-size: 12.5px; min-height: 18px; display: none; }
-  .status-line.show { display: block; }
-  .status-line.success { color: var(--success); }
-  .status-line.error { color: var(--error); }
-  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  :root{--bg:#0a0a0f;--surface:#13131a;--surface2:#1c1c28;--border:#2a2a3d;--accent:#7c6af7;--accent2:#e055a3;--text:#e8e8f0;--muted:#6b6b88;--success:#2dd4a0;--error:#f05a5a}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Syne',sans-serif;background:var(--bg);min-height:100vh;color:var(--text);overflow-x:hidden}
+  body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 50% at 10% 20%,rgba(124,106,247,0.12) 0%,transparent 60%),radial-gradient(ellipse 50% 40% at 90% 80%,rgba(224,85,163,0.09) 0%,transparent 60%);pointer-events:none;z-index:0}
+  .wrapper{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:40px 24px 60px}
+  header{text-align:center;margin-bottom:36px;animation:fadeUp 0.6s ease both}
+  .badge{display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:100px;padding:5px 14px;font-size:12px;font-weight:600;color:var(--accent);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:18px}
+  h1{font-size:clamp(28px,5vw,50px);font-weight:800;line-height:1.1;letter-spacing:-1px;background:linear-gradient(135deg,#fff 0%,#c4beff 50%,#e055a3 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:12px}
+  header p{font-size:15px;color:var(--muted);max-width:500px;margin:0 auto;line-height:1.7}
+  .config-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:24px 28px;margin-bottom:24px;animation:fadeUp 0.6s 0.1s ease both}
+  .card-label{font-size:11px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+  .api-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:580px){.api-grid{grid-template-columns:1fr}}
+  .field-label{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:6px}
+  select,.api-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:11px 14px;font-family:'DM Mono',monospace;font-size:13px;color:var(--text);outline:none;transition:border-color 0.2s,box-shadow 0.2s;appearance:none}
+  select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236b6b88' d='M6 8L0 0h12z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+  select option{background:#1c1c28}
+  select:focus,.api-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,106,247,0.18)}
+  .api-input::placeholder{color:var(--muted)}
+  .hint-box{margin-top:14px;padding:11px 14px;background:var(--surface2);border-radius:10px;font-size:12.5px;color:var(--muted);line-height:1.75}
+  .hint-box a{color:var(--accent);text-decoration:none;font-weight:600}
+  .hint-box a:hover{text-decoration:underline}
+  .hint-box code{background:rgba(124,106,247,0.15);color:var(--accent);padding:1px 6px;border-radius:4px;font-family:'DM Mono',monospace;font-size:12px}
+  .editor-grid{display:grid;grid-template-columns:1fr 48px 1fr;gap:16px;align-items:start;animation:fadeUp 0.6s 0.2s ease both}
+  @media(max-width:700px){.editor-grid{grid-template-columns:1fr}.arrow-col{display:none}}
+  .panel{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px}
+  .panel-head{display:flex;align-items:center;justify-content:space-between}
+  .panel-title{font-size:13px;font-weight:700}
+  .char-pill{background:var(--surface2);border:1px solid var(--border);border-radius:100px;padding:3px 10px;font-size:11px;color:var(--muted);font-family:'DM Mono',monospace}
+  textarea{width:100%;min-height:220px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px;font-family:'Syne',sans-serif;font-size:14px;color:var(--text);line-height:1.7;resize:vertical;outline:none;transition:border-color 0.2s}
+  textarea:focus{border-color:var(--accent)}
+  textarea::placeholder{color:var(--muted)}
+  .panel-actions{display:flex;gap:8px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:11px 20px;border:none;border-radius:12px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.2s;white-space:nowrap}
+  .btn-primary{background:linear-gradient(135deg,var(--accent) 0%,#9b88ff 100%);color:#fff;box-shadow:0 4px 18px rgba(124,106,247,0.3)}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(124,106,247,0.45)}
+  .btn-primary:active{transform:translateY(0)}
+  .btn-primary:disabled{opacity:0.5;cursor:not-allowed;transform:none;box-shadow:none}
+  .btn-ghost{background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
+  .btn-ghost:hover{color:var(--text);border-color:var(--accent)}
+  .btn-copy{background:rgba(45,212,160,0.12);color:var(--success);border:1px solid rgba(45,212,160,0.25);flex:1}
+  .btn-copy:hover{background:rgba(45,212,160,0.22)}
+  .arrow-col{display:flex;align-items:center;justify-content:center;padding-top:120px}
+  .arrow-icon{font-size:22px;color:var(--muted)}
+  .progress-wrap{display:none;flex-direction:column;gap:6px}
+  .progress-wrap.show{display:flex}
+  .progress-label{font-size:12px;color:var(--muted)}
+  .progress-bar-bg{background:var(--surface2);border-radius:100px;height:4px;overflow:hidden}
+  .progress-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:100px;transition:width 0.4s ease}
+  .status-line{font-size:12.5px;min-height:18px;display:none}
+  .status-line.show{display:block}
+  .status-line.success{color:var(--success)}
+  .status-line.error{color:var(--error)}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
 <div class="wrapper">
-
   <header>
-    <div class="badge">✦ AI Detection Bypass ✦</div>
+    <div class="badge">✦ AI to Human Converter ✦</div>
     <h1>AI → Human<br>Text Converter</h1>
-    <p>Use your own API key from any provider — free options available. Removes AI words, fixes caps &amp; gaps, fully rewrites to sound human.</p>
+    <p>Paste AI text, pick your provider, get natural human writing that passes AI detectors.</p>
   </header>
 
   <div class="config-card">
@@ -287,8 +123,8 @@
       <div id="outputStatus" class="status-line"></div>
     </div>
   </div>
-
 </div>
+
 <script>
 const inputText    = document.getElementById('inputText');
 const outputText   = document.getElementById('outputText');
@@ -300,106 +136,123 @@ const progressFill = document.getElementById('progressFill');
 const progressLabel= document.getElementById('progressLabel');
 
 const HINTS = {
-  groq:      { html: '🟢 <strong>100% free — no credit card needed.</strong> Sign up at <a href="https://console.groq.com" target="_blank">console.groq.com</a> → API Keys. Your key starts with <code>gsk_</code>', ph: 'gsk_...' },
-  gemini:    { html: '🟢 <strong>Free tier available.</strong> Get key at <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a> → Get API Key. Your key starts with <code>AIza</code>', ph: 'AIza...' },
-  openai:    { html: '🟡 Paid (free $5 trial on new accounts). Get key at <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com</a>. Your key starts with <code>sk-</code>', ph: 'sk-...' },
-  anthropic: { html: '🟡 Paid (free credits on signup). Get key at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>. Your key starts with <code>sk-ant-</code>', ph: 'sk-ant-...' },
+  groq:      { html:'🟢 <strong>100% free — no credit card.</strong> Sign up at <a href="https://console.groq.com" target="_blank">console.groq.com</a> → API Keys. Key starts with <code>gsk_</code>', ph:'gsk_...' },
+  gemini:    { html:'🟢 <strong>Free tier.</strong> Get key at <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a> → Get API Key. Key starts with <code>AIza</code>', ph:'AIza...' },
+  openai:    { html:'🟡 Paid (free $5 trial on new accounts). Get key at <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com</a>. Key starts with <code>sk-</code>', ph:'sk-...' },
+  anthropic: { html:'🟡 Paid (free credits on signup). Get key at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>. Key starts with <code>sk-ant-</code>', ph:'sk-ant-...' },
 };
 
-const SYSTEM = `You are an expert at converting AI-generated text into natural, fluent, human-sounding writing that bypasses AI detectors like GPTZero and Originality.ai.
+const SYSTEM = `You are rewriting AI-generated text to sound completely human. The output must pass GPTZero, Originality.ai, Turnitin, and Copyleaks at 100% human.
 
-RULES — follow every single one:
-1. Rewrite EVERY sentence completely — not one original sentence survives intact
-2. Vary sentence lengths: mix short punchy sentences (5-8 words) with longer flowing ones (20-30 words) — never uniform or monotone
-3. Add contractions everywhere: don't, won't, can't, I'm, it's, they're, we've, you'd, that's, there's, what's, isn't, aren't, wasn't, didn't, doesn't, couldn't, shouldn't, wouldn't
-4. Remove ALL these AI words/phrases and replace naturally:
-   - Furthermore / Moreover / Additionally → Also / On top of that / Plus
-   - Utilize → use
-   - Facilitate → help / make it easier
-   - Leverage → use / take advantage of
-   - Implement → put in place / use / do
-   - Subsequently / Consequently → then / so / after that
-   - It is important to note / It is worth noting → just remove, or say "worth noting"
-   - In conclusion / In summary → So / Look / Here's the thing / Basically
-   - Significant / Significantly → big / major / really
-   - Optimal → best
-   - Numerous → many / a lot of
-   - Individuals → people
-   - In order to → to
-   - Such as → like
-   - As well as → and / plus
-   - Due to the fact that → because
-   - Plays a crucial role → really matters / makes a big difference
-   - Wide range of → lots of / all kinds of
-5. Add natural human fillers occasionally: "honestly", "basically", "actually", "kind of", "you know", "which is interesting", "to be fair"
-6. Vary sentence starters — avoid repeating "The", "This", "It", "These", "There" too often
-7. Fix ALL capitalization errors — no random CAPS mid-sentence
-8. Remove extra blank lines — max one blank line between paragraphs, keep flow tight and natural
-9. Prefer active voice over passive voice
-10. Keep ALL facts 100% intact — only the style changes
-11. Keep any headings, fully rewrite all body text
-12. Output ONLY the rewritten text — no preamble, no explanation, nothing else`;
+The single biggest signal AI detectors use is BURSTINESS — the lack of sentence length variation. AI writes every sentence at roughly the same length. Humans don't. Fix this first.
+
+REWRITING RULES:
+1. Rewrite every sentence from scratch — no original phrasing survives
+2. Sentence lengths must vary wildly. Short. Then a much longer one that flows and builds on the thought. Then medium. Then very short again. Mix 4-word and 35-word sentences in the same paragraph.
+3. Contractions everywhere — don't, won't, can't, I'm, it's, they're, we've, you'd, that's, there's, isn't, didn't, doesn't, couldn't, wouldn't
+4. Ban these words entirely — replace with the casual alternative shown:
+   Furthermore → Also / And
+   Moreover → On top of that
+   Additionally → Plus / Also
+   Subsequently → Then / After that
+   Consequently → So / As a result
+   Utilize → use
+   Facilitate → help / make easier
+   Leverage → use
+   Implement → use / do / put in place
+   Optimal → best
+   Significant/Significantly → big / major / really
+   Numerous → many / a lot of
+   Individuals → people
+   Paramount → most important
+   Comprehensive → full / complete / thorough
+   Robust → strong / solid
+   Delve → look into / explore / dig into
+   Embark → start / begin
+   In order to → to
+   Such as → like
+   As well as → and
+   Due to the fact that → because
+   In the event that → if
+   It is important to note → (just delete it)
+   In conclusion → So / Look / Here's the thing
+   In summary → Basically / So
+   A wide range of → lots of / all kinds of
+   Plays a crucial role → really matters / makes a big difference
+5. Start some sentences with: And / But / So / Look — / Honestly, / The thing is, / Here's what's interesting —
+6. Add natural mid-sentence expressions occasionally: "— which actually makes sense —" / "and honestly that's the key" / "which, when you think about it," / "(at least in most cases)"
+7. Use em dashes and parentheses naturally
+8. Vary how sentences start — not always The / This / It / These / There
+9. Fix ALL capitalization problems — no random CAPS in the middle of sentences
+10. Remove extra blank lines — one blank line max between paragraphs, keep it tight
+11. Active voice only — not "it was found" but "we found"
+12. Keep every fact, number, name, date exactly the same — only style changes
+13. Keep all headings, bullet points, numbered lists exactly where they are — only rewrite paragraph body text
+14. Output the rewritten text only — no intro sentence, no explanation`;
+
+const buildUserMsg = (text) => `Rewrite the following text so it reads as 100% human. Make sentence lengths wildly different — that is the most important thing. Use contractions. Add personality. Remove all AI words. Fix caps and extra blank lines. Output only the rewritten text.
+
+---
+${text}
+---`;
 
 function onProviderChange() {
   const p = document.getElementById('provider').value;
   document.getElementById('hintBox').innerHTML = HINTS[p].html;
   document.getElementById('apiKey').placeholder = HINTS[p].ph;
-  try {
-    const saved = localStorage.getItem('hum_' + p);
-    document.getElementById('apiKey').value = saved || '';
-  } catch(e) {}
+  try { document.getElementById('apiKey').value = localStorage.getItem('hum_'+p) || ''; } catch(e) {}
 }
 
 function showStatus(el, msg, type) { el.textContent = msg; el.className = 'status-line show ' + type; }
 function hideStatus(el) { el.className = 'status-line'; }
-function setProgress(pct, label) { progressFill.style.width = pct + '%'; progressLabel.textContent = label; progressWrap.className = 'progress-wrap show'; }
+function setProgress(pct, label) { progressFill.style.width = pct+'%'; progressLabel.textContent = label; progressWrap.className = 'progress-wrap show'; }
 function hideProgress() { progressWrap.className = 'progress-wrap'; progressFill.style.width = '0%'; }
 
 async function callGroq(key, text) {
   const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
-    body: JSON.stringify({ model: 'llama-3.3-70b-versatile', max_tokens: 2048, temperature: 0.85,
-      messages: [{ role: 'system', content: SYSTEM }, { role: 'user', content: 'Humanize this:\n\n' + text }] })
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+    body:JSON.stringify({model:'llama-3.3-70b-versatile',max_tokens:2048,temperature:0.9,
+      messages:[{role:'system',content:SYSTEM},{role:'user',content:buildUserMsg(text)}]})
   });
-  if (!r.ok) { const e = await r.json(); throw new Error(e.error?.message || 'Groq error ' + r.status); }
+  if (!r.ok) { const e = await r.json(); throw new Error(e.error?.message || 'Groq error '+r.status); }
   return (await r.json()).choices[0].message.content.trim();
 }
 
 async function callGemini(key, text) {
-  const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + key, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      system_instruction: { parts: [{ text: SYSTEM }] },
-      contents: [{ parts: [{ text: 'Humanize this:\n\n' + text }] }],
-      generationConfig: { temperature: 0.85, maxOutputTokens: 2048 }
+  const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key='+key, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      system_instruction:{parts:[{text:SYSTEM}]},
+      contents:[{parts:[{text:buildUserMsg(text)}]}],
+      generationConfig:{temperature:0.9,maxOutputTokens:2048}
     })
   });
-  if (!r.ok) { const e = await r.json(); throw new Error(e.error?.message || 'Gemini error ' + r.status); }
+  if (!r.ok) { const e = await r.json(); throw new Error(e.error?.message || 'Gemini error '+r.status); }
   return (await r.json()).candidates[0].content.parts[0].text.trim();
 }
 
 async function callOpenAI(key, text) {
   const r = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
-    body: JSON.stringify({ model: 'gpt-4o-mini', max_tokens: 2048, temperature: 0.85,
-      messages: [{ role: 'system', content: SYSTEM }, { role: 'user', content: 'Humanize this:\n\n' + text }] })
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+    body:JSON.stringify({model:'gpt-4o-mini',max_tokens:2048,temperature:0.9,
+      messages:[{role:'system',content:SYSTEM},{role:'user',content:buildUserMsg(text)}]})
   });
-  if (!r.ok) { const e = await r.json(); throw new Error(e.error?.message || 'OpenAI error ' + r.status); }
+  if (!r.ok) { const e = await r.json(); throw new Error(e.error?.message || 'OpenAI error '+r.status); }
   return (await r.json()).choices[0].message.content.trim();
 }
 
 async function callAnthropic(key, text) {
   const r = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
-    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 2048, system: SYSTEM,
-      messages: [{ role: 'user', content: 'Humanize this:\n\n' + text }] })
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2048,system:SYSTEM,
+      messages:[{role:'user',content:buildUserMsg(text)}]})
   });
-  if (!r.ok) { const e = await r.json(); throw new Error(e.error?.message || 'Anthropic error ' + r.status); }
-  return (await r.json()).content.map(b => b.type === 'text' ? b.text : '').join('').trim();
+  if (!r.ok) { const e = await r.json(); throw new Error(e.error?.message || 'Anthropic error '+r.status); }
+  return (await r.json()).content.map(b => b.type==='text' ? b.text : '').join('').trim();
 }
 
 inputText.addEventListener('input', () => { document.getElementById('inCount').textContent = inputText.value.length.toLocaleString(); });
@@ -410,16 +263,16 @@ async function humanizeText() {
   const prov = document.getElementById('provider').value;
   if (!text) { showStatus(inputStatus, '✗ Paste some text first', 'error'); return; }
   if (!key)  { showStatus(inputStatus, '✗ Enter your API key above', 'error'); return; }
-  try { localStorage.setItem('hum_' + prov, key); } catch(e) {}
+  try { localStorage.setItem('hum_'+prov, key); } catch(e) {}
 
   convertBtn.disabled = true;
   outputText.value = '';
   document.getElementById('outCount').textContent = '0';
   hideStatus(inputStatus); hideStatus(outputStatus);
-  setProgress(15, 'Connecting to ' + prov + '...');
+  setProgress(15, 'Connecting to '+prov+'...');
 
   try {
-    setProgress(40, 'Rewriting with AI...');
+    setProgress(40, 'Rewriting...');
     let result = '';
     if      (prov === 'groq')      result = await callGroq(key, text);
     else if (prov === 'gemini')    result = await callGemini(key, text);
@@ -430,11 +283,11 @@ async function humanizeText() {
     outputText.value = result;
     document.getElementById('outCount').textContent = result.length.toLocaleString();
     setTimeout(hideProgress, 1800);
-    showStatus(inputStatus,  '✓ Humanized successfully!', 'success');
+    showStatus(inputStatus,  '✓ Done! Check the output.', 'success');
     showStatus(outputStatus, '✓ Ready to copy', 'success');
   } catch(err) {
     hideProgress();
-    showStatus(inputStatus, '✗ ' + err.message, 'error');
+    showStatus(inputStatus, '✗ '+err.message, 'error');
   } finally {
     convertBtn.disabled = false;
   }
@@ -450,7 +303,7 @@ function copyText() {
 
 function clearInput()  { inputText.value  = ''; document.getElementById('inCount').textContent  = '0'; hideStatus(inputStatus); }
 function clearOutput() { outputText.value = ''; document.getElementById('outCount').textContent = '0'; hideStatus(outputStatus); }
-document.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') humanizeText(); });
+document.addEventListener('keydown', e => { if ((e.ctrlKey||e.metaKey) && e.key==='Enter') humanizeText(); });
 
 onProviderChange();
 </script>
