@@ -386,24 +386,13 @@
 
 <div class="wrapper">
 
-  <!-- Header -->
-  <header>
-    <div class="badge"><span>✦</span> AI Detection Bypass <span>✦</span></div>
-    <h1>AI → Human<br>Text Converter</h1>
-    <p>3-pass deep rewrite. Built to pass GPTZero, Originality.ai & Turnitin.</p>
-  </header>
 
-  <!-- API Config -->
-  <div class="config-card">
-    <div class="card-label">⚙ API Configuration</div>
-    <div class="api-row">
-      <input type="password" id="apiKey" placeholder="sk-ant-api03-...  (your Anthropic API key)">
-      <button class="btn btn-primary" onclick="saveApiKey()">Save Key</button>
+  <!-- No API needed notice -->
+  <div class="config-card" style="border-color: var(--success); background: rgba(45,212,160,0.06);">
+    <div class="card-label" style="color: var(--success);">✓ No API Key Required</div>
+    <div class="hint" style="color: var(--text); font-size:13.5px;">
+      This tool runs <strong>100% offline in your browser</strong> — no API key, no internet, no cost. Just paste your text and convert!
     </div>
-    <div class="hint">
-      Get a free key at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> — stored only in your browser, never sent to any server.
-    </div>
-    <div id="keyStatus" class="status-line" style="margin-top:10px;"></div>
   </div>
 
   <!-- Editor Grid -->
@@ -440,7 +429,7 @@
         <div class="panel-title">✅ Human Text — Copy Here</div>
         <div class="char-pill"><span id="outCount">0</span> chars</div>
       </div>
-      <textarea id="outputText" placeholder="Your 100% human-sounding result will appear here..." readonly></textarea>
+      <textarea id="outputText" placeholder="Your humanized result will appear here..." readonly></textarea>
 
       <div class="panel-actions">
         <button class="btn btn-copy" onclick="copyText()">⎘ Copy to Clipboard</button>
@@ -453,101 +442,201 @@
 </div>
 
 <script>
-  const inputText   = document.getElementById('inputText');
-  const outputText  = document.getElementById('outputText');
-  const apiKeyInput = document.getElementById('apiKey');
-  const keyStatus   = document.getElementById('keyStatus');
-  const inputStatus = document.getElementById('inputStatus');
-  const outputStatus= document.getElementById('outputStatus');
-  const convertBtn  = document.getElementById('convertBtn');
-  const progressWrap= document.getElementById('progressWrap');
-  const progressFill= document.getElementById('progressFill');
-  const progressLabel = document.getElementById('progressLabel');
-
-  // Load saved key
-  try {
-    const saved = localStorage.getItem('humanizer_key');
-    if (saved) { apiKeyInput.value = saved; showStatus(keyStatus, '✓ API key loaded', 'success'); }
-  } catch(e) {}
+  const inputText    = document.getElementById('inputText');
+  const outputText   = document.getElementById('outputText');
+  const inputStatus  = document.getElementById('inputStatus');
+  const outputStatus = document.getElementById('outputStatus');
+  const convertBtn   = document.getElementById('convertBtn');
+  const progressWrap = document.getElementById('progressWrap');
+  const progressFill = document.getElementById('progressFill');
+  const progressLabel= document.getElementById('progressLabel');
 
   inputText.addEventListener('input', () => {
     document.getElementById('inCount').textContent = inputText.value.length.toLocaleString();
-  });
-  outputText.addEventListener('input', () => {
-    document.getElementById('outCount').textContent = outputText.value.length.toLocaleString();
   });
 
   function showStatus(el, msg, type) {
     el.textContent = msg;
     el.className = `status-line show ${type}`;
   }
-  function hideStatus(el) {
-    el.className = 'status-line';
-  }
-
-  function saveApiKey() {
-    const key = apiKeyInput.value.trim();
-    if (!key.startsWith('sk-ant-')) {
-      showStatus(keyStatus, '✗ Invalid key — must start with sk-ant-', 'error');
-      return;
-    }
-    try {
-      localStorage.setItem('humanizer_key', key);
-      showStatus(keyStatus, '✓ Key saved securely in your browser', 'success');
-      setTimeout(() => hideStatus(keyStatus), 3000);
-    } catch(e) {
-      showStatus(keyStatus, '✗ Failed to save', 'error');
-    }
-  }
+  function hideStatus(el) { el.className = 'status-line'; }
 
   function setProgress(pct, label) {
     progressFill.style.width = pct + '%';
     progressLabel.textContent = label;
     progressWrap.className = 'progress-wrap show';
   }
-
   function hideProgress() {
     progressWrap.className = 'progress-wrap';
     progressFill.style.width = '0%';
   }
 
-  async function apiCall(system, userMsg, passNum) {
-    const key = apiKeyInput.value.trim();
-    const labels = ['', 'Pass 1 / 3 — Deep structural rewrite...', 'Pass 2 / 3 — Rhythm & burstiness injection...', 'Pass 3 / 3 — Final AI detector sweep...'];
-    const pcts   = [0, 15, 50, 82];
-    setProgress(pcts[passNum], labels[passNum]);
+  // ── Pass 1: Replace AI phrases & formal words ──
+  function pass1_replacePhrases(text) {
+    const replacements = [
+      [/\bfurthermore\b/gi, 'also'],
+      [/\bmoreover\b/gi, 'on top of that'],
+      [/\bin addition\b/gi, 'plus'],
+      [/\bnevertheless\b/gi, 'still'],
+      [/\bnotwithstanding\b/gi, 'even so'],
+      [/\bsubsequently\b/gi, 'then'],
+      [/\bconsequently\b/gi, 'so'],
+      [/\bthus\b/gi, 'so'],
+      [/\bhence\b/gi, 'so'],
+      [/\butilize\b/gi, 'use'],
+      [/\butilization\b/gi, 'use'],
+      [/\bfacilitate\b/gi, 'help'],
+      [/\bleverage\b/gi, 'use'],
+      [/\bimplement\b/gi, 'use'],
+      [/\bcommence\b/gi, 'start'],
+      [/\bterminate\b/gi, 'end'],
+      [/\bascertain\b/gi, 'find out'],
+      [/\bdemonstrate\b/gi, 'show'],
+      [/\bexhibit\b/gi, 'show'],
+      [/\bpossess\b/gi, 'have'],
+      [/\bobtain\b/gi, 'get'],
+      [/\bpurchase\b/gi, 'buy'],
+      [/\brequire\b/gi, 'need'],
+      [/\bsignificant(ly)?\b/gi, (m, s) => s ? 'really' : 'big'],
+      [/\bsignificant impact\b/gi, 'big effect'],
+      [/\bplay a crucial role\b/gi, 'really matter'],
+      [/\bwide range of\b/gi, 'lots of'],
+      [/\ba variety of\b/gi, 'many'],
+      [/\bin order to\b/gi, 'to'],
+      [/\bas well as\b/gi, 'and'],
+      [/\bsuch as\b/gi, 'like'],
+      [/\bin conclusion\b/gi, "here's the thing"],
+      [/\bto summarize\b/gi, 'basically'],
+      [/\bin summary\b/gi, 'so'],
+      [/\bit is important to note\b/gi, 'worth noting'],
+      [/\bit is worth noting\b/gi, 'worth noting'],
+      [/\bone must\b/gi, 'you should'],
+      [/\bone can\b/gi, 'you can'],
+      [/\bindividuals\b/gi, 'people'],
+      [/\bchildren\b/gi, 'kids'],
+      [/\bnumerous\b/gi, 'many'],
+      [/\badditionally\b/gi, 'also'],
+      [/\bprior to\b/gi, 'before'],
+      [/\bsubsequent to\b/gi, 'after'],
+      [/\bin the event that\b/gi, 'if'],
+      [/\bdue to the fact that\b/gi, 'because'],
+      [/\bfor the purpose of\b/gi, 'to'],
+      [/\bat this point in time\b/gi, 'now'],
+      [/\bin the near future\b/gi, 'soon'],
+      [/\bkey factor\b/gi, 'big thing'],
+      [/\boptimal\b/gi, 'best'],
+      [/\bfundamental\b/gi, 'basic'],
+      [/\bprimary\b/gi, 'main'],
+      [/\bsufficient\b/gi, 'enough'],
+      [/\bultimately\b/gi, 'in the end'],
+    ];
+    let out = text;
+    for (const [pat, rep] of replacements) out = out.replace(pat, rep);
+    return out;
+  }
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-opus-4-5',
-        max_tokens: 3000,
-        system,
-        messages: [{ role: 'user', content: userMsg }]
-      })
+  // ── Pass 2: Add contractions ──
+  function pass2_contractions(text) {
+    const contractions = [
+      [/\bdo not\b/g, "don't"],
+      [/\bwill not\b/g, "won't"],
+      [/\bcannot\b/g, "can't"],
+      [/\bcan not\b/g, "can't"],
+      [/\bI am\b/g, "I'm"],
+      [/\bI have\b/g, "I've"],
+      [/\bI will\b/g, "I'll"],
+      [/\bit is\b/g, "it's"],
+      [/\bthey are\b/g, "they're"],
+      [/\bthey have\b/g, "they've"],
+      [/\bwe are\b/g, "we're"],
+      [/\bwe have\b/g, "we've"],
+      [/\byou are\b/g, "you're"],
+      [/\byou have\b/g, "you've"],
+      [/\bhe is\b/g, "he's"],
+      [/\bshe is\b/g, "she's"],
+      [/\bthat is\b/g, "that's"],
+      [/\bthere is\b/g, "there's"],
+      [/\bwhat is\b/g, "what's"],
+      [/\bis not\b/g, "isn't"],
+      [/\bare not\b/g, "aren't"],
+      [/\bwas not\b/g, "wasn't"],
+      [/\bwere not\b/g, "weren't"],
+      [/\bhas not\b/g, "hasn't"],
+      [/\bhave not\b/g, "haven't"],
+      [/\bhad not\b/g, "hadn't"],
+      [/\bdoes not\b/g, "doesn't"],
+      [/\bdid not\b/g, "didn't"],
+      [/\bwould not\b/g, "wouldn't"],
+      [/\bcould not\b/g, "couldn't"],
+      [/\bshould not\b/g, "shouldn't"],
+    ];
+    let out = text;
+    for (const [pat, rep] of contractions) out = out.replace(pat, rep);
+    return out;
+  }
+
+  // ── Pass 3: Vary sentence rhythm & inject natural fillers ──
+  function pass3_rhythm(text) {
+    const fillers = [
+      'honestly', 'basically', 'actually', 'you know', 'pretty much',
+      'kind of', 'which is interesting', 'and that matters', 'right?',
+      'it\'s worth saying', 'to be fair', 'and honestly'
+    ];
+    const openers = [
+      'Look, ', 'So, ', 'Here\'s the thing — ', 'The thing is, ',
+      'And really, ', 'Honestly, ', 'To be fair, '
+    ];
+
+    // Split into paragraphs
+    const paras = text.split(/\n\n+/);
+    const result = paras.map(para => {
+      // Skip headings / short lines
+      if (para.trim().length < 60 || /^#{1,4}\s/.test(para.trim())) return para;
+
+      // Split paragraph into sentences
+      let sentences = para.match(/[^.!?]+[.!?]+/g) || [para];
+
+      sentences = sentences.map((s, i) => {
+        let trimmed = s.trim();
+
+        // Randomly insert a filler after comma or mid-sentence
+        if (Math.random() < 0.25 && trimmed.length > 60) {
+          const filler = fillers[Math.floor(Math.random() * fillers.length)];
+          trimmed = trimmed.replace(/,\s+/, `, ${filler}, `);
+        }
+
+        // Occasionally prepend an opener to first sentence of paragraph
+        if (i === 0 && Math.random() < 0.3 && !/^(So|Look|Here|The thing|And|Honestly|To be fair)/.test(trimmed)) {
+          const opener = openers[Math.floor(Math.random() * openers.length)];
+          trimmed = opener + trimmed.charAt(0).toLowerCase() + trimmed.slice(1);
+        }
+
+        // Break very long sentences (>45 words) at a conjunction
+        const words = trimmed.split(' ');
+        if (words.length > 45) {
+          const mid = Math.floor(words.length / 2);
+          const pivot = [' and ', ' but ', ' which ', ' so ', ' because '].find(c => trimmed.includes(c));
+          if (pivot) {
+            const idx = trimmed.indexOf(pivot, trimmed.length / 3);
+            if (idx > 0) {
+              return trimmed.slice(0, idx).trim() + '. ' + trimmed.slice(idx + pivot.length).trim();
+            }
+          }
+        }
+
+        return trimmed;
+      });
+
+      return sentences.join(' ');
     });
 
-    if (!response.ok) {
-      const err = await response.json();
-      throw new Error(err.error?.message || `API error ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data.content[0].text.trim();
+    return result.join('\n\n');
   }
+
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
   async function humanizeText() {
     const text = inputText.value.trim();
-    const key  = apiKeyInput.value.trim();
-
-    if (!key.startsWith('sk-ant-')) {
-      showStatus(inputStatus, '✗ Save your API key first', 'error'); return;
-    }
     if (!text) {
       showStatus(inputStatus, '✗ Paste some text first', 'error'); return;
     }
@@ -560,69 +649,18 @@
     hideStatus(outputStatus);
 
     try {
-      // ── Pass 1: Deep structural rewrite ──
-      const p1 = await apiCall(
-        `You are rewriting AI-generated text to sound completely human. You MUST pass GPTZero, Originality.ai, and Turnitin.
-RULES:
-1. Rewrite EVERY sentence — not one original sentence survives
-2. Vary sentence length wildly: short punchy ones and long rambling ones
-3. Use unexpected word choices — the slightly surprising word a real person picks
-4. Sprinkle natural fillers: "honestly", "basically", "kind of", "pretty much", "actually", "you know"
-5. Contractions EVERYWHERE: don't, won't, can't, I'm, it's, they're, we've
-6. Kill formal patterns: no "Furthermore", "Moreover", "It is important", "Utilize", "Leverage", "Facilitate"
-7. Prefer active voice over passive
-8. KEEP all facts and information intact
-9. Keep section headings, rewrite body text completely
-10. Output ONLY the rewritten text.`,
-        `Rewrite this AI text to sound 100% human:\n\n${text}`,
-        1
-      );
-      outputText.value = p1;
-      document.getElementById('outCount').textContent = p1.length.toLocaleString();
+      setProgress(10, 'Pass 1 / 3 — Replacing AI phrases...');
+      await sleep(400);
+      const p1 = pass1_replacePhrases(text);
 
-      // ── Pass 2: Burstiness & rhythm ──
-      const p2 = await apiCall(
-        `You are a human writing coach fixing text rhythm. The text sounds mostly human but may have AI-like even sentence rhythms.
-YOUR JOB:
-1. Fix paragraphs where sentences are too similar in length
-2. Split some long sentences into 2-3 short punchy ones
-3. Merge some choppy sentences into flowing longer ones
-4. Add 2-3 natural expressions per paragraph: "which is kind of wild", "honestly though", "and that actually matters", "right?", "it's weird but"
-5. Replace remaining formal words with casual equivalents
-6. Vary sentence openings — too many starting with "This", "The", "It" is a flag
-7. Convert passive voice to active where possible
-8. Do NOT change any facts. Keep headings and structure.
-9. Output ONLY the improved text.`,
-        `Improve the rhythm and human feel:\n\n${p1}`,
-        2
-      );
-      outputText.value = p2;
-      document.getElementById('outCount').textContent = p2.length.toLocaleString();
+      setProgress(45, 'Pass 2 / 3 — Adding contractions...');
+      await sleep(350);
+      const p2 = pass2_contractions(p1);
 
-      // ── Pass 3: Final AI detector sweep ──
-      const p3 = await apiCall(
-        `You are an expert at beating AI detection (GPTZero, Originality.ai, Turnitin). Final sweep:
-1. Sentences starting with "This/The/These/It" too often → vary openings
-2. Passive voice → active
-3. Any word used 3+ times in same paragraph → replace duplicates
-4. Sentences over 35 words with no pause → break them up
-5. 3+ sentences in a row of same length → adjust rhythm
-6. Replace these phrases:
-   "play a crucial role" → "really matter" or "make a big difference"
-   "significant impact" → "big effect" or "really changes things"
-   "wide range" → "lots of" or "all kinds of"
-   "key factor" → "big thing" or "really important part"
-   "in order to" → "to"
-   "as well as" → "and also" or "plus"
-   "such as" → "like"
-   "Furthermore/Moreover" → "So" or "And"
-   "In conclusion" → "Look" or "Here's the thing"
-7. Any robotic or overly formal sentences → reword naturally
-8. Do NOT change any facts.
-9. Output ONLY the final polished text.`,
-        `Final pass — fix all remaining AI patterns:\n\n${p2}`,
-        3
-      );
+      setProgress(80, 'Pass 3 / 3 — Adjusting rhythm & tone...');
+      await sleep(400);
+      const p3 = pass3_rhythm(p2);
+
       outputText.value = p3;
       document.getElementById('outCount').textContent = p3.length.toLocaleString();
 
@@ -633,8 +671,7 @@ YOUR JOB:
 
     } catch(err) {
       hideProgress();
-      showStatus(inputStatus,  `✗ ${err.message}`, 'error');
-      showStatus(outputStatus, '✗ Conversion failed', 'error');
+      showStatus(inputStatus, `✗ ${err.message}`, 'error');
     } finally {
       convertBtn.disabled = false;
       convertBtn.classList.remove('pulsing');
@@ -652,7 +689,6 @@ YOUR JOB:
   function clearInput()  { inputText.value  = ''; document.getElementById('inCount').textContent  = '0'; hideStatus(inputStatus); }
   function clearOutput() { outputText.value = ''; document.getElementById('outCount').textContent = '0'; hideStatus(outputStatus); }
 
-  // Ctrl/Cmd + Enter shortcut
   document.addEventListener('keydown', e => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') humanizeText();
   });
